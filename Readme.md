@@ -5,8 +5,8 @@
 
 Сборка проекта с консоли:
 ```bash
-mkdir build
-cd build
+cd VulkanTriangle
+mkdir build && cd build
 cmake ..
 make
 ```
