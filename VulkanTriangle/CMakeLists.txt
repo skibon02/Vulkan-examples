@@ -15,7 +15,7 @@ add_custom_target(CompileShaders
         COMMAND glslc ${CMAKE_SOURCE_DIR}/shaders/triangle.frag -o ${CMAKE_BINARY_DIR}/shaders/frag.spv
         )
 
-add_executable(VulkanTriangle main.cpp cls.cpp cls.h)
+add_executable(VulkanTriangle main.cpp)
 include_directories(
         ${Vulkan_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/external/glfw3/include

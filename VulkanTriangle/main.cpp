@@ -228,15 +228,15 @@ VulkanStuff initVulkan(GLFWwindow* window) {
 
     uint32_t formatCount;
     vkGetPhysicalDeviceSurfaceFormatsKHR(vk.physicalDevice, vk.surface, &formatCount, nullptr);
-    VkSurfaceFormatKHR* formats = new VkSurfaceFormatKHR[formatCount];
-    vkGetPhysicalDeviceSurfaceFormatsKHR(vk.physicalDevice, vk.surface, &formatCount, formats);
+    vector<VkSurfaceFormatKHR> formats(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(vk.physicalDevice, vk.surface, &formatCount, formats.data());
     //find surfaceFormat
-    if (formatCount == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
-        vk.surfaceFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
-        vk.surfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-    }
-    else {
-        vk.surfaceFormat = formats[0];
+    vk.surfaceFormat = formats[0];
+    for(auto &format : formats) {
+        if(format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            vk.surfaceFormat = format;
+            break;
+        }
     }
 
     uint32_t presentModeCount;
@@ -526,7 +526,7 @@ void draw(VulkanStuff& vk) {
         exit(-1);
     }
 
-    VkClearColorValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+    VkClearColorValue clearColor = {0.95f, 0.7f, 0.8f, 1.0f};
     VkClearValue clearValue = {};
     clearValue.color = clearColor;
 
