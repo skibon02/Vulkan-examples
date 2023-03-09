@@ -146,15 +146,43 @@ VulkanStuff initVulkan(GLFWwindow* window) {
         cout << "Failed to find GPUs with Vulkan support" << endl;
         exit(-1);
     }
-    VkPhysicalDevice* devices = new VkPhysicalDevice[deviceCount];
-    vkEnumeratePhysicalDevices(vk.instance, &deviceCount, devices);
+    vector<VkPhysicalDevice> devices(deviceCount);
+    vector<VkPhysicalDeviceProperties> deviceProperties(deviceCount);
+    vkEnumeratePhysicalDevices(vk.instance, &deviceCount, devices.data());
+    
     vk.physicalDevice = devices[0];
+    
+    //select appropriate device
+    for (int i = 0; i < deviceCount; i++) {
+        vkGetPhysicalDeviceProperties(devices[i], &deviceProperties[i]);
+    }
 
-    //create logical device
+    int physicalDeviceIndex = -1;
+    // priority 1:  discrete gpu
+    for (int i = 0; i < deviceCount; i++) {
+        if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+            physicalDeviceIndex = i;
+            cout << "Discrete GPU found!" << endl;
+            break;
+        }
+    }
 
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(vk.physicalDevice, &deviceProperties);
-    std::cout << "Selected physical device: " << deviceProperties.deviceName << std::endl;
+    // priority 2:  integrated gpu
+    if (physicalDeviceIndex == -1)
+        for (int i = 0; i < deviceCount; i++) {
+            if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+                physicalDeviceIndex = i;
+                cout << "Integrated GPU found!" << endl;
+                break;
+            }
+        }
+
+    if(physicalDeviceIndex == -1) {
+        cout << "No discrete/integrated GPU found!" << endl;
+    }
+
+    vk.physicalDevice = devices[physicalDeviceIndex];
+    cout << "Selected GPU: " << deviceProperties[physicalDeviceIndex].deviceName << endl;
 
     //find queue families
     uint32_t graphicsQueueFamilyIndex = UINT32_MAX;
@@ -241,8 +269,8 @@ VulkanStuff initVulkan(GLFWwindow* window) {
 
     uint32_t presentModeCount;
     vkGetPhysicalDeviceSurfacePresentModesKHR(vk.physicalDevice, vk.surface, &presentModeCount, nullptr);
-    VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
-    vkGetPhysicalDeviceSurfacePresentModesKHR(vk.physicalDevice, vk.surface, &presentModeCount, presentModes);
+    vector<VkPresentModeKHR> presentModes(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(vk.physicalDevice, vk.surface, &presentModeCount, presentModes.data());
 
     VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
     swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -278,8 +306,8 @@ VulkanStuff initVulkan(GLFWwindow* window) {
     //create image views
     uint32_t imageCount;
     vkGetSwapchainImagesKHR(vk.device, vk.swapchain, &imageCount, nullptr);
-    VkImage* images = new VkImage[imageCount];
-    vkGetSwapchainImagesKHR(vk.device, vk.swapchain, &imageCount, images);
+    vector<VkImage> images(imageCount);
+    vkGetSwapchainImagesKHR(vk.device, vk.swapchain, &imageCount, images.data());
 
     vk.swapchainImageViews.resize(imageCount);
     for (int i = 0; i < imageCount; i++) {
