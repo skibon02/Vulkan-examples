@@ -11,7 +11,6 @@ cmake ..
 make
 ```
 
-### *CMakeLists.txt написан для сборки на Windows, для работы в Linux инструкция ниже:*
 ## Сборка на Linux:
 1) Скачать glslc и добавить в PATH: https://askubuntu.com/questions/1252585/how-to-install-glslc-on-ubuntu-20-04
 2) поставить библиотеку glfw3: sudo apt-get install libglfw3-dev (для Debian-based)
