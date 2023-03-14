@@ -139,7 +139,7 @@ VulkanStuff initVulkan(GLFWwindow* window) {
     }
 
 
-    //create physical device
+    //find physical device
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(vk.instance, &deviceCount, nullptr);
     if (deviceCount == 0) {
@@ -151,35 +151,35 @@ VulkanStuff initVulkan(GLFWwindow* window) {
     vkEnumeratePhysicalDevices(vk.instance, &deviceCount, devices.data());
     
     vk.physicalDevice = devices[0];
-    
-    //select appropriate device
-    for (int i = 0; i < deviceCount; i++) {
-        vkGetPhysicalDeviceProperties(devices[i], &deviceProperties[i]);
-    }
 
-    int physicalDeviceIndex = -1;
-    // priority 1:  discrete gpu
-    for (int i = 0; i < deviceCount; i++) {
-        if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-            physicalDeviceIndex = i;
-            cout << "Discrete GPU found!" << endl;
-            break;
-        }
-    }
-
-    // priority 2:  integrated gpu
-    if (physicalDeviceIndex == -1)
+        //select appropriate device
         for (int i = 0; i < deviceCount; i++) {
-            if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+            vkGetPhysicalDeviceProperties(devices[i], &deviceProperties[i]);
+        }
+
+        int physicalDeviceIndex = -1;
+        // priority 1:  discrete gpu
+        for (int i = 0; i < deviceCount; i++) {
+            if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
                 physicalDeviceIndex = i;
-                cout << "Integrated GPU found!" << endl;
+                cout << "Discrete GPU found!" << endl;
                 break;
             }
         }
 
-    if(physicalDeviceIndex == -1) {
-        cout << "No discrete/integrated GPU found!" << endl;
-    }
+        // priority 2:  integrated gpu
+        if (physicalDeviceIndex == -1)
+            for (int i = 0; i < deviceCount; i++) {
+                if (deviceProperties[i].deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+                    physicalDeviceIndex = i;
+                    cout << "Integrated GPU found!" << endl;
+                    break;
+                }
+            }
+
+        if(physicalDeviceIndex == -1) {
+            cout << "No discrete/integrated GPU found!" << endl;
+        }
 
     vk.physicalDevice = devices[physicalDeviceIndex];
     cout << "Selected GPU: " << deviceProperties[physicalDeviceIndex].deviceName << endl;
